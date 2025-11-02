@@ -4,6 +4,10 @@ const app = express();
 const mongoose = require("mongoose");
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
+const User = require("./model/UserModel");
+const { createSecretToken } = require("./util/SecretToken");
+const bcrypt = require("bcryptjs");
+// const { userVerification } = require("./Middleware/AuthMiddleware");
 const cors = require("cors");
 const { OrdersModel } = require("./model/OrdersModel");
 let PORT = process.env.PORT || 3000;
@@ -17,7 +21,10 @@ ConnectMONOGDB().then(() => {
 }).catch(() => {
     console.log("some error to connect with MongoDB");
 });
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // 👈 must match your frontend origin exactly
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -214,9 +221,64 @@ app.get("/getWatchlist", async (req, res) => {
     );
     console.log(fetchdata, "fetchdata");
     res.json(fetchdata);
-
 });
 
+app.post("/signup", async (req, res) => {
+    try {
+        const { email, password, firstName, lastName, createdAt } = req.body;
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.json({ message: "User already exists" });
+        };
+        const user = new User({ email, password, firstName, lastName, createdAt });
+        await user.save();
+        const token = createSecretToken(user._id);
+        res.cookie("token", token, {
+            httpOnly: true,       // safer: prevents JS access
+            secure: false,        // set to true if using HTTPS
+            sameSite: "Lax"
+        });
+        res
+            .status(201)
+            .json({ message: "User signed in successfully", success: true, user });
+    } catch (error) {
+        console.error(error);
+    }
+});
+app.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: "Incorrect password or email" });
+        }
+
+        const auth = await bcrypt.compare(password, user.password);
+        if (!auth) {
+            return res.status(401).json({ message: "Incorrect password or email" });
+        }
+
+        const token = createSecretToken(user._id);
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: false, // set to true if using HTTPS
+            sameSite: "Lax"
+        });
+
+        res.status(200).json({
+            message: "User logged in successfully",
+            success: true
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Login failed", error });
+    }
+});
 
 app.listen(PORT, () => {
     console.log("app Started");

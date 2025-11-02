@@ -11,6 +11,8 @@ import Navbar from './landing_page/Navbar.jsx';
 import Footer from './landing_page/Footer.jsx';
 import NotFound from "./landing_page/NotFound";
 import Signup from "./landing_page/signup/Signup.jsx"
+import Login from './landing_page/login/Login.jsx';
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -23,6 +25,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/Pricing"  element={<PricingPage/>} />
         <Route path="/Product"  element={<ProductPage/>} />
         <Route path="/Support"  element={<SupportPage/>} />
+        <Route path="/Login" element={<Login/>} />
         <Route path="*" element={<NotFound/>}/>
       </Routes>
       <Footer/>

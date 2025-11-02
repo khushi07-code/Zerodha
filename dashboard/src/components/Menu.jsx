@@ -1,27 +1,60 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  // const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const handleMenuClick = (index) => {
     setSelectedMenu(index);
   };
 
-  const handleProfileClick = (index) => {
-    setIsProfileDropdownOpen(!isProfileDropdownOpen);
-  };
+  // const handleProfileClick = (index) => {
+  //   setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  // };
 
   const menuClass = "menu";
   const activeMenuClass = "menu selected";
+  const [cookies, removeCookie] = useCookies([]);
+  useEffect(() => {
+    const verifyCookie = async () => {
+      if (!cookies.token) {
+        setTimeout(() => {
+          window.location.href = "http://localhost:5173/Login";
+        }, 1000);
+      }
+      const { data } = await axios.post(
+        "http://localhost:8080",
+        {},
+        { withCredentials: true }
+      );
+      const { status, user } = data;
+      setUsername(user);
+      return status
+        ? toast(`Hello ${user}`, {
+          position: "top-right",
+        })
+        : (removeCookie("token"),
+          setTimeout(() => {
+            window.location.href = "http://localhost:5173/Login";
+          }, 1000));
+    };
+    verifyCookie();
+  }, [cookies, useEffect, removeCookie]);
+  const Logout = () => {
+    removeCookie("token");
+    setTimeout(() => {
+      window.location.href = "http://localhost:5173/Login";
+    }, 1000);
+  };
 
   return (
     <div className="menu-container">
       <img src="logo.png" style={{ width: "50px" }} />
       <div className="menus">
-        <ul>
+        <ul className="my-3">
           <li>
             <Link
               style={{ textDecoration: "none" }}
@@ -90,9 +123,17 @@ const Menu = () => {
           </li>
         </ul>
         <hr />
-        <div className="profile" onClick={handleProfileClick}>
-          <div className="avatar">ZU</div>
-          <p className="username">USERID</p>
+        <div className="profile" >
+          <div class="dropdown ">
+            <button class="btn dropdown-toggle avatar" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-solid fa-user"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><button class="dropdown-item" onClick={Logout}>Logout</button></li>
+            </ul>
+          </div>
+
         </div>
       </div>
     </div>
