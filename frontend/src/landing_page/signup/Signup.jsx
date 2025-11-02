@@ -40,7 +40,7 @@ function Signup() {
       if (success) {
         handleSuccess(message);
         setTimeout(() => {
-          window.location.href = "http://localhost:5174";
+          window.location.href = `${process.env.DASHBOARD}`;
         }, 1000);
 
       } else {

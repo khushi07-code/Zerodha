@@ -22,7 +22,7 @@ const Menu = () => {
     const verifyCookie = async () => {
       if (!cookies.token) {
         setTimeout(() => {
-          window.location.href = "http://localhost:5173/Login";
+          window.location.href = `${process.env.FRONTEND}/Login`;
         }, 1000);
       }
       const { data } = await axios.post(
@@ -38,7 +38,7 @@ const Menu = () => {
         })
         : (removeCookie("token"),
           setTimeout(() => {
-            window.location.href = "http://localhost:5173/Login";
+            window.location.href = `${process.env.FRONTEND}/Login`;
           }, 1000));
     };
     verifyCookie();
@@ -46,7 +46,7 @@ const Menu = () => {
   const Logout = () => {
     removeCookie("token");
     setTimeout(() => {
-      window.location.href = "http://localhost:5173/Login";
+      window.location.href = `${process.env.FRONTEND}/Login`;
     }, 1000);
   };
 

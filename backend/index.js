@@ -2,16 +2,24 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+
+
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
 const User = require("./model/UserModel");
+
+
 const { createSecretToken } = require("./util/SecretToken");
 const bcrypt = require("bcryptjs");
 // const { userVerification } = require("./Middleware/AuthMiddleware");
+
+
 const cors = require("cors");
 const { OrdersModel } = require("./model/OrdersModel");
+
 let PORT = process.env.PORT || 3000;
 const MongoUrl = process.env.MONGO_URL;
+
 
 async function ConnectMONOGDB() {
     await mongoose.connect(MongoUrl);
